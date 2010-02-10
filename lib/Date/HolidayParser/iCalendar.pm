@@ -14,6 +14,9 @@
 # in order to make it easier to use for users familiar with iCalendar, and
 # make it compatible with DP::iCalendar::Manager.
 
+package Date::HolidayParser::iCalendar;
+
+die('Not ready');
 
 # Purpose: Enable iCalendar emulation
 # Usage: obj->enable_ical_interface();
