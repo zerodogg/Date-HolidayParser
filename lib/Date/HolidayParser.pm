@@ -36,13 +36,13 @@ has 'file' => (
 
 has '_cache' => (
 	is => 'rw',
-	isa => 'Hashref',
+	isa => 'HashRef',
 	default => sub { {} },
 );
 
 has '_parsed' => (
 	is => 'rw',
-	isa => 'Hashref', # TODO: Move to arrayref(?)
+	isa => 'HashRef', # TODO: Move to arrayref(?)
 	default => sub { {} },
 );
 
@@ -69,11 +69,11 @@ sub get
 		carp("Date::HolidayParser: Can't parse years lower than 1971 or higher than 2037");
 		return;
 	}
-	if(not $self->cache->{$Year})
+	if(not $self->_cache->{$Year})
 	{
-		$self->cache->{$Year} = $self->_interperate_year($Year);
+		$self->_cache->{$Year} = $self->_interperate_year($Year);
 	}
-	return($self->cache->{$Year});
+	return($self->_cache->{$Year});
 }
 
 # --- Public functions ---
