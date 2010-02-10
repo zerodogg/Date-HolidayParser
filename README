@@ -2,8 +2,8 @@ Date::HolidayParser
 
 Date::HolidayParser is a parser for .holiday files. These are
 files that define holidays in various parts of the world in
-an easy to read and easy to write (but hard to parse due
-to its very flexible) format.
+a format that is easy to read and write, but somewhat hard to
+parse due to its flexible and forgiving nature.
 
 DOCUMENTATION
 The documentation is included in the pm file.
@@ -24,7 +24,7 @@ To install this module, run the following commands:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2006, 2007 Eskild Hustvedt
+Copyright (C) 2006, 2007, 2010 Eskild Hustvedt
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
