@@ -1,0 +1,7 @@
+# Standard ignores
+*~
+*.swp
+# Ignores of files that get created, but shouldn't be added to git
+Makefile
+Date-HolidayParser/blib/
+Date-HolidayParser/pm_to_blib
