@@ -1,11 +1,23 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Date-HolidayParser
-version:      0.3.1
-version_from: lib/Date/HolidayParser.pm
-installdirs:  site
+--- #YAML:1.0
+name:               Date-HolidayParser
+version:            0.4
+abstract:           Parser for .holiday-files
+author:
+    - Eskild Hustvedt <zerodogg@cpan.org>
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    Test::More:  0
 requires:
-    Test::More:                    0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+    Any::Moose:  0
+    Test::More:  0
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.55_02
+meta-spec:
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4
