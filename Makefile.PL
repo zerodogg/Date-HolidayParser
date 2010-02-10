@@ -8,9 +8,12 @@ WriteMakefile(
     VERSION_FROM        => 'lib/Date/HolidayParser.pm',
     ABSTRACT_FROM       => 'lib/Date/HolidayParser.pm',
     PL_FILES            => {},
+	PREREQ => {
+		'Any::Moose' => 0,
+	},
     PREREQ_PM => {
         'Test::More' => 0,
     },
-    dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    dist                => { COMPRESS => 'bzip2 -9f', SUFFIX => 'bz2', },
     clean               => { FILES => 'Date-HolidayParser-*' },
 );
