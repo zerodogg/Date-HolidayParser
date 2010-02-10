@@ -3,7 +3,12 @@ Revision history for Date-HolidayParser
 Version 0.4 (Unreleased)
 -------------------------------------------
 - Fixed an eternal loop on some errornious lines
-- DP::iCalendar::Manager support
+- Added Date::HolidayParser::iCalendar (DP::iCalendar-like interface
+	to Date::HolidayParser).
+- Converted to the Moose object system (uses Any::Moose, so it is
+	compatible with Moose and Mouse).
+- Dropped legacy function-oriented interface
+- Huge cleanup
 
 Version 0.3 (Released 1st of August 2006)
 ----------------------------------------
