@@ -16,24 +16,121 @@
 
 package Date::HolidayParser::iCalendar;
 
-die('Not ready');
+use Moose;
+use Date::HolidayParser;
+use constant { true => 1, false => 0 };
 
-# Purpose: Enable iCalendar emulation
-# Usage: obj->enable_ical_interface();
-sub enable_ical_interface
+extends 'Date::HolidayParser';
+
+has '_UID_List' => (
+	is => 'rw',
+	isa => 'HashRef',
+	default => sub { {} },
+);
+has '_iCal_cache' => (
+	is => 'rw',
+	isa => 'HashRef',
+	default => sub { {} },
+);
+
+# -- Public methods --
+
+# Purpose: Get an iCalendar hash with holiday info matching the supplied UID
+# Usage: get_info(UID);
+sub get_info
 {
-	my $this = shift;
-	$this->{ICAL} = true;
-	$this->{UID_LIST} = {};
-	return(true);
+	my $self = shift;
+	my $UID = shift;
+	return($self->_UID_List->{$UID}) if $self->_UID_List->{$UID};
+	return(false);
 }
+
+# Purpose: Get information for the supplied month (list of days there are events)
+# Usage: my $TimeRef = $object->get_monthinfo(YEAR,MONTH,DAY);
+sub get_monthinfo
+{
+	my($self, $Year, $Month) = @_;	# TODO: verify that they are set
+	$self->get($Year);
+	my @Array;
+	if(defined($self->_iCal_cache->{$Year}) and defined($self->_iCal_cache->{$Year}{$Month})){
+		@Array = sort keys(%{$self->_iCal_cache->{$Year}{$Month}});
+	}
+	return(\@Array);
+}
+
+# Purpose: Get information for the supplied date (list of times in the day there are events)
+# Usage: my $TimeRef = $object->get_dateinfo(YEAR,MONTH,DAY);
+sub get_dateinfo
+{
+	my($self, $Year, $Month, $Day) = @_;	# TODO: verify that they are set
+	$self->get($Year);
+	my @Array;
+	if(defined($self->_iCal_cache->{$Year}) and defined($self->_iCal_cache->{$Year}{$Month}) and defined($self->_iCal_cache->{$Year}{$Month}{$Day})) {
+		@Array = sort keys(%{$self->_iCal_cache->{$Year}{$Month}{$Day}});
+	}
+	return(\@Array);
+}
+
+# Purpose: Return an empty array, unsupported.
+# Usage: my $UIDRef = $object->get_timeinfo(YEAR,MONTH,DAY,TIME);
+sub get_timeinfo
+{
+	my($self, $Year, $Month, $Day,$Time) = @_;
+
+	return(undef) if not $Time eq 'DAY';
+
+	$self->get($Year);
+
+	if( defined($self->_iCal_cache->{$Year}) and
+		defined($self->_iCal_cache->{$Year}{$Month}) and
+		defined($self->_iCal_cache->{$Year}{$Month}{$Day})
+	)
+	{
+		return($self->_iCal_cache->{$Year}{$Month}{$Day}{$Time});
+	}
+	return([]);
+}
+
+# Purpose: Get a list of months which have events (those with *only* recurring not counted)
+# Usage: my $ArrayRef = $object->get_months();
+sub get_months
+{
+	my ($self, $Year) = @_;
+	$self->get($Year);
+	my @Array = sort keys(%{$self->_iCal_cache->{$Year}});
+	return(\@Array);
+}
+
+# Purpose: Check if there is an holiday event with the supplied UID
+# Usage: $bool = $object->exists($UID);
+sub exists
+{
+	my $self = shift;
+	my $UID = shift;
+	return(true) if defined($self->_UID_List->{$UID});
+	return(false);
+}
+
+# -- Unsupported or dummy methods, here for compatibility --
+
+# Purpose: Return an empty array, unsupported.
+# Usage: my $ArrayRef = $object->get_years();
+sub get_years
+{
+	return([]);
+}
+
+# -- DP::iCalendar compatibility code --
+
+# Used by DP::iCalendar::Manager to set the prodid in output iCalendar files.
+# We can't output iCalendar files, so we just ignore calls to it.
+sub set_prodid { }
 
 # Purpose: Return manager information
 # Usage: get_manager_version();
 sub get_manager_version
 {
-	my $this = shift;
-	return(false) if not $this->{ICAL}; # Don't allow this to be enabled if we're not in iCalendar emulation mode
+	my $self = shift;
 	return('01_capable');
 }
 
@@ -45,20 +142,35 @@ sub get_manager_capabilities
 	return(['LIST_DPI',])
 }
 
-# Purpose: Get an emulated UID
-# Usage: get_info(UID);
-sub get_info {
-	my $this = shift;
-	my $UID = shift;
-	return($this->{UID_LIST}{$UID}) if $this->{UID_LIST}{$UID};
-	return(false);
-}
+
+# -- Private methods --
+
+# Purpose: Wraps _addParsedEvent in Date::HolidayParser so that an iCalendar version
+# 	is also created at the same time.
+around '_addParsedEvent' => sub
+{
+	my $orig = shift;
+	my $self = shift;
+
+	my($FinalParsing,$final_mon,$final_mday,$HolidayName,$holidayType,$FinalYDay,$PosixYear) = @_;
+
+	my $UID = $self->_event_to_iCalendar(POSIX::mktime(0, 0, 0, $FinalYDay, 0, $PosixYear),$HolidayName);
+	my $Year = $PosixYear+1900;
+
+	if(not $self->_iCal_cache->{$Year}->{$final_mon}{$final_mday}{'DAY'})
+	{
+		$self->_iCal_cache->{$Year}->{$final_mon}{$final_mday}{'DAY'} = [];
+	}
+	push(@{$self->_iCal_cache->{$Year}->{$final_mon}{$final_mday}{'DAY'}}, $UID);
+
+	return $self->$orig(@_);
+};
 
 # Purpose: Generate an iCalendar entry
 # Usage: this->_event_to_iCalendar(UNIXTIME, NAME);
 sub _event_to_iCalendar
 {
-	my $this = shift;
+	my $self = shift;
 	my $unixtime = shift;
 	my $name = shift;
 	# Generate the UID of the event, this is simply a 
@@ -69,7 +181,7 @@ sub _event_to_iCalendar
 	# the changed calendar, instead of from the HolidayParser object.
 	my $UID = 'D-HP-ICS-'.$unixtime.$name;
 	
-	$this->{UID_LIST}{$UID} = {
+	$self->_UID_List->{$UID} = {
 		UID => $UID,
 		DTSTART => iCal_ConvertFromUnixTime($unixtime),
 		DTEND => iCal_ConvertFromUnixTime($unixtime+86390), # Yes, this is purposefully not 86400
@@ -77,66 +189,6 @@ sub _event_to_iCalendar
 	};
 	return($UID);
 }
-
-# Purpose: Get information for the supplied month (list of days there are events)
-# Usage: my $TimeRef = $object->get_monthinfo(YEAR,MONTH,DAY);
-sub get_monthinfo {
-	my($this, $Year, $Month) = @_;	# TODO: verify that they are set
-	$this->get($Year);
-	my @Array;
-	if(defined($this->{cache}{$Year}) and defined($this->{cache}{$Year}{$Month})){
-		@Array = sort keys(%{$this->{cache}{$Year}{$Month}});
-	}
-	return(\@Array);
-}
-
-# Purpose: Get information for the supplied date (list of times in the day there are events)
-# Usage: my $TimeRef = $object->get_dateinfo(YEAR,MONTH,DAY);
-sub get_dateinfo {
-	my($this, $Year, $Month, $Day) = @_;	# TODO: verify that they are set
-	$this->get($Year);
-	my @Array;
-	if(defined($this->{cache}{$Year}) and defined($this->{cache}{$Year}{$Month}) and defined($this->{cache}{$Year}{$Month}{$Day})) {
-		@Array = sort keys(%{$this->{cache}{$Year}{$Month}{$Day}});
-	}
-	return(\@Array);
-}
-
-# Purpose: Return an empty array, unsupported.
-# Usage: my $UIDRef = $object->get_timeinfo(YEAR,MONTH,DAY,TIME);
-sub get_timeinfo {
-	my($this, $Year, $Month, $Day,$Time) = @_;
-	return(undef) if not $Time eq 'DAY';
-	$this->get($Year);
-	if(defined($this->{cache}{$Year}) and defined($this->{cache}{$Year}{$Month}) and defined($this->{cache}{$Year}{$Month}{$Day})) {
-		return($this->{cache}{$Year}{$Month}{$Day}{$Time});
-	}
-	return([]);
-}
-
-# Purpose: Return an empty array, unsupported.
-# Usage: my $ArrayRef = $object->get_years();
-sub get_years {
-	return([]);
-}
-
-# Purpose: Get a list of months which have events (those with *only* recurring not counted)
-# Usage: my $ArrayRef = $object->get_months();
-sub get_months {
-	my ($this, $Year) = @_;
-	$this->get($Year);
-	my @Array = sort keys(%{$this->{cache}{$Year}});
-	return(\@Array);
-}
-
-sub exists {
-	my $this = shift;
-	my $UID = shift;
-	return(true) if defined($this->{UID_LIST}{$UID});
-	return(false);
-}
-
-sub set_prodid { }
 
 # The following three functions are originally from DP::iCalendar
 
