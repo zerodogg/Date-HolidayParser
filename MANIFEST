@@ -7,5 +7,9 @@ COPYING
 COPYING.gpl
 COPYING.artistic
 lib/Date/HolidayParser.pm
-t/Date-HolidayParser.t
+lib/Date/HolidayParser/iCalendar.pm
 t/testholiday
+t/01-Date-HolidayParser.t
+t/02-iCalendar-submod-basics.t
+t/03-iCalendar.t
+t/basicTest.pm
