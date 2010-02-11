@@ -20,6 +20,8 @@ use Moose;
 use Date::HolidayParser;
 use constant { true => 1, false => undef };
 
+our $VERSION = 0.4;
+
 extends 'Date::HolidayParser';
 
 has '_UID_List' => (
