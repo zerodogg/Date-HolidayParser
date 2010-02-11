@@ -154,6 +154,16 @@ sub BUILD
 
 # --- Private methods ---
 
+# Purpose: Add a parsed event to the final hash
+# Usage: obj->_addParsedEvent(FinalParsing, final_mon, final_mday, holidayName, HolidayType, finalYDay, PosixYear);
+# The reason this is used is because submodules, ie. ::iCalendar, overrides or wraps this to generate
+# data specific to that module.
+sub _addParsedEvent
+{
+	my($self,$FinalParsing,$final_mon,$final_mday,$HolidayName,$holidayType,$finalYDay,$PosixYear) = @_;
+	$FinalParsing->{$final_mon}{$final_mday}{$HolidayName} = $holidayType;
+}
+
 # Purpose: Calculate a NumericYDay
 # Usage: $CreativeParser{FinalYDay} = _HCalc_NumericYDay($CreativeParser{NumericYDay}, $CreativeParser{AddDays}, $CreativeParser{SubtDays});
 sub _HCalc_NumericYDay
@@ -465,7 +475,7 @@ sub _interperate_year
 					my $PosixYear = $Year - 1900;
 					my ($final_sec,$final_min,$final_hour,$final_mday,$final_mon,$final_year,$final_wday,$final_yday,$final_isdst) = localtime(POSIX::mktime(0, 0, 0, $FinalYDay, 0, $PosixYear));
 					$final_mon++;
-					$FinalParsing->{$final_mon}{$final_mday}{$HolidayName} = $CreativeParser->{HolidayType};
+					$self->_addParsedEvent($FinalParsing, $final_mon, $final_mday, $HolidayName, $CreativeParser->{HolidayType}, $FinalYDay, $PosixYear);
 				}
 				if(defined($CreativeParser->{Every}) and defined($CreativeParser->{Number}))
 				{
