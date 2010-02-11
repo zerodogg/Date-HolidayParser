@@ -18,7 +18,7 @@ package Date::HolidayParser::iCalendar;
 
 use Moose;
 use Date::HolidayParser;
-use constant { true => 1, false => 0 };
+use constant { true => 1, false => undef };
 
 extends 'Date::HolidayParser';
 
@@ -92,7 +92,7 @@ sub get_timeinfo
 }
 
 # Purpose: Get a list of months which have events (those with *only* recurring not counted)
-# Usage: my $ArrayRef = $object->get_months();
+# Usage: my $ArrayRef = $object->get_months(YEAR);
 sub get_months
 {
 	my ($self, $Year) = @_;
@@ -173,13 +173,14 @@ sub _event_to_iCalendar
 	my $self = shift;
 	my $unixtime = shift;
 	my $name = shift;
+	$name =~ s/\s/-/g;
 	# Generate the UID of the event, this is simply a 
 	my $sum = unpack("%32C*", $name);
 	# This should be unique enough for our needs.
 	# We don't want it to be random, because if someone copies the events to their
 	# own calendar, we want DP::iCalendar::Manager to fetch the information from
 	# the changed calendar, instead of from the HolidayParser object.
-	my $UID = 'D-HP-ICS-'.$unixtime.$name;
+	my $UID = 'D-HP-ICS-'.$unixtime.$sum;
 	
 	$self->_UID_List->{$UID} = {
 		UID => $UID,
