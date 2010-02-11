@@ -148,6 +148,7 @@ sub BUILD
 	{
 		carp($self->file.': does not exist');
 	}
+	$self->_load_and_parse($self->file);
 }
 
 
@@ -176,12 +177,12 @@ sub _HCalc_NumericYDay
 # Usage: $DayName = _Holiday_DayName(INTEGER_NUMBER, YEAR);
 sub _Holiday_DayName
 {
+	my $yDay = shift;
 	my $year = shift;
-	my $oYear = $year;
 	$year -= 1900;
 
-	my $PosixTime = POSIX::mktime(0, 0, 0, $oYear, 0, $year);
-	die("*** _Holiday_DayName: For some reason mktime returned undef!. Was running: \"POSIX::mktime(0, 0, 0, $oYear, 0, $year)\".\nYou've probably got a loop that has started looping eternally. This error is fatal") unless(defined($PosixTime));
+	my $PosixTime = POSIX::mktime(0, 0, 0, $yDay, 0, $year);
+	die("*** _Holiday_DayName: For some reason mktime returned undef!. Was running: \"POSIX::mktime(0, 0, 0, $yDay, 0, $year)\".\nYou've probably got a loop that has started looping eternally. This error is fatal") unless(defined($PosixTime));
 	my %NumToDayHash = (
 		0 => 'sunday',
 		1 => 'monday',
@@ -330,7 +331,9 @@ sub _interperate_year
 					}
 					$NumericYDay = $Last_YDay;
 					$CreativeParser->{BeforeOrAfter} = 'before';
-				} else {
+				}
+				else
+				{
 					# Parse the final
 					$NumericYDay = $proper_yday;
 					if($CreativeParser->{Number} eq 'first')
@@ -392,7 +395,8 @@ sub _interperate_year
 						}
 						$FinalYDay = $FinalYDay - 1;
 					}
-				} elsif ($CreativeParser->{BeforeOrAfter} eq 'after')
+				}
+				elsif ($CreativeParser->{BeforeOrAfter} eq 'after')
 				{
 					# After parsing
 					# Okay, we need to find the closest $CreativeParser{MustBeDay} after $CreativeParser{FinalYDay}
