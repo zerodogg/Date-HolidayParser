@@ -16,7 +16,7 @@
 
 package Date::HolidayParser::iCalendar;
 
-use Moose;
+use Any::Moose;
 use Date::HolidayParser;
 use constant { true => 1, false => undef };
 
@@ -228,3 +228,81 @@ sub _PrefixZero {
 
 # End of Date::HolidayParser::iCalendar
 1;
+
+__END__
+=head1 NAME
+
+Date::HolidayParser::iCalendar - iCalendar-like interface extension to Date::HolidayParser
+
+=head1 VERSION
+
+0.4
+
+=head1 SYNOPSIS
+
+This is an extension to Date::HolidayParser that adds an iCalendar-like interface
+to the holiday data.
+
+	use Date::HolidayParser;
+
+	my $Holidays = Date::HolidayParser->new("$ENV{HOME}/.holiday");
+	
+	...
+
+=head1 DESCRIPTION
+
+This is an extension to Date::HolidayParser that adds an interface that provides
+iCalendar-compatible data instead of the normal "raw" Date::HolidayParser format.
+
+It ensures that UIDs generated are always the same, so you can depend upon them
+not changing between runs. The iCalendar data generated at the moment is very
+simple, and doesn't take into account recurrances (recurring events gets one event
+created per recurrance).
+
+=head1 EXPORT
+
+See L<Date::HolidayParser>
+
+=head1 METHODS
+
+See L<Date::HolidayParser> for construction information and all of the
+other methods this class inherits. Any method you can use on L<Date::HolidayParser>
+you can use on Date::HolidayParser::iCalendar as well.
+
+=head2 $object = Date::HolidayParser->new(FILE);
+
+This is the main function. It creates a new Date::HolidayParser object for FILE and
+parses the file.
+
+FILE must be the full path to the holiday file you want to parse.
+
+=head2 $object->get(YEAR);
+
+This gets the holidays for YEAR. It uses the already parsed FILE and calculates the
+holidays in YEAR and returns a hashref with the parsed data or undef on failure.
+
+YEAR must be a full year (ie. 2006) not a year relative to 1900 (ie. 106).
+
+See the section HASH SYNTAX below for the syntax of the returned hashref.
+
+=head1 AUTHOR
+
+Eskild Hustvedt - C<< <zerodogg@cpan.org> >>
+
+=head1 BUGS
+
+Please report any bugs or feature requests to
+C<bug-date-holidayparser@rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Date-HolidayParser>.
+I will be notified, and then you'll automatically be notified of progress on
+your bug as I make changes.
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (C) 2006, 2007, 2010 Eskild Hustvedt, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself. There is NO warranty;
+not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
