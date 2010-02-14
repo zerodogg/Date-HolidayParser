@@ -7,7 +7,7 @@ use FindBin;
 use Data::Dumper
 require $FindBin::RealBin.'/basicTest.pm';
 
-plan tests => 91;
+plan tests => 99;
 
 my $parser = Date::HolidayParser::iCalendar->new("$FindBin::RealBin/testholiday");
 
@@ -16,15 +16,23 @@ isa_ok($parser,'Date::HolidayParser::iCalendar');
 ok(defined $parser->get_manager_version,'get_manager_version returned something');
 ok(defined $parser->get_manager_capabilities,'get_manager_capabilities returned something');
 ok(eq_set($parser->get_months(2006),[3,4,5,12]),'->get_months(2006)');
+ok(eq_set($parser->list_events(2006),[3,4,5,12]),'->list_events(2006)');
 ok(eq_set($parser->get_monthinfo(2006,3),[13,27]),'->get_monthinfo(2006,3)');
 ok(eq_set($parser->get_monthinfo(2006,4),[2,16,30]),'->get_monthinfo(2006,4)');
 ok(eq_set($parser->get_monthinfo(2006,5),[17,21]),'->get_monthinfo(2006,5)');
 ok(eq_set($parser->get_monthinfo(2006,12),[17]),'->get_monthinfo(2006,12)');
+ok(eq_set($parser->list_events(2006,3),[13,27]),'->list_events(2006,3)');
+ok(eq_set($parser->list_events(2006,4),[2,16,30]),'->get_monthinfo(2006,4)');
+ok(eq_set($parser->list_events(2006,5),[17,21]),'->get_monthinfo(2006,5)');
+ok(eq_set($parser->list_events(2006,12),[17]),'->get_monthinfo(2006,12)');
 is_deeply($parser->get_dateinfo(2006,3,13),['DAY'],'->get_dateinfo(2006,3,13)');
 is_deeply($parser->get_dateinfo(2006,3,3),[],'->get_dateinfo(2006,3,3)');
 is_deeply($parser->get_timeinfo(2006,3,3,'DAY'),[],'->get_timeinfo(2006,3,3)');
+is_deeply($parser->list_events(2006,3,3),[],'->list_events(2006,3,3)');
 ok(@{$parser->get_timeinfo(2006,5,17,'DAY')} == 3,'Number of events on 2006,5,17,DAY');
 is_deeply($parser->get_timeinfo(2006,3,13,'DAY'),['D-HP-ICS-1142204400616'],'->get_timeinfo(2006,3,13)');
+ok(@{$parser->list_events(2006,5,17)} == 3,'Number of events on 2006,5,17,DAY');
+is_deeply($parser->list_events(2006,3,13),['D-HP-ICS-1142204400616'],'->list_events(2006,3,13)');
 my $event = {
 	'SUMMARY' => 'Monday',
 	'UID' => 'D-HP-ICS-1142204400616',
