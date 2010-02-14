@@ -47,6 +47,33 @@ sub get_info
 	return(false);
 }
 
+# Purpose: List events in said year, on said month and day
+# Usage: obj->list_events(year?,month?,day?);
+# year is required, others are optional.
+#
+# This is the primary API for this module. It does only wrap the other
+# methods, but provides a cleaner interface for new code.
+sub list_events
+{
+	my ($self,$Year,$Month,$Day) = @_;
+	if(not defined $Year)
+	{
+		croak('Requried parameter "Year" not supplied');
+	}
+	if(defined $Day)
+	{
+		return $self->get_timeinfo($Year,$Month,$Day,'DAY');
+	}
+	elsif(defined $Month)
+	{
+		return $self->get_monthinfo($Year,$Month);
+	}
+	else
+	{
+		return $self->get_months($Year);
+	}
+}
+
 # Purpose: Get information for the supplied month (list of days there are events)
 # Usage: my $TimeRef = $object->get_monthinfo(YEAR,MONTH,DAY);
 sub get_monthinfo
@@ -259,31 +286,55 @@ not changing between runs. The iCalendar data generated at the moment is very
 simple, and doesn't take into account recurrances (recurring events gets one event
 created per recurrance).
 
-=head1 EXPORT
-
-See L<Date::HolidayParser>
-
 =head1 METHODS
 
-See L<Date::HolidayParser> for construction information and all of the
-other methods this class inherits. Any method you can use on L<Date::HolidayParser>
-you can use on Date::HolidayParser::iCalendar as well.
+You can run any method L<Date::HolidayParser> supports on a
+L<Date::HolidayParser::iCalendar> object (but then you should probably be using
+Date::HolidayParser instead). The methods documented here are all those needed
+to make use of Date::HolidayParser::iCalendar.
 
-=head2 $object = Date::HolidayParser->new(FILE);
+=head2 $object = Date::HolidayParser::iCalendar->new(FILE);
 
-This is the main function. It creates a new Date::HolidayParser object for FILE and
-parses the file.
+This is the main function. It creates a new Date::HolidayParser::iCalendar
+object for FILE and parses the file.
 
 FILE must be the full path to the holiday file you want to parse.
 
-=head2 $object->get(YEAR);
+=head2 $arrayRef = $object->list_events(YEAR,MONTH?,DAY?);
 
-This gets the holidays for YEAR. It uses the already parsed FILE and calculates the
-holidays in YEAR and returns a hashref with the parsed data or undef on failure.
+This returns an arrayRef, which contains one of three lists, depending
+on how many parameters are supplied:
 
-YEAR must be a full year (ie. 2006) not a year relative to 1900 (ie. 106).
+=over
 
-See the section HASH SYNTAX below for the syntax of the returned hashref.
+=item Only year: An array containing a list of months (1-12) that has holidays
+
+=item Year+Month: An array of days in said month that has holidays
+
+=item All: A list of iCalendar UIDs referring to holidays on said date. These UIDs can be supplied to get_info() to retrieve the event.
+
+=back
+
+=head2 $UID_Info = $object->get_info(UID);
+
+Returns an iCalendar hash reference for the supplied UID or undef if
+the UID doesn't exist.
+
+The hash returned is structured like this:
+
+	%Hash = (
+		ICAL_ENTRY => "ENTRY_VALUE",
+		ANOTHER_ENTRY => "ANOTHER_VALUE",
+	);
+
+An example might look like this:
+
+	%Hash = (
+		'SUMMARY' => 'Monday',
+		'UID' => 'D-HP-ICS-1142204400616',
+		'DTEND' => '20060313',
+		'DTSTART' => '20060313'
+	);
 
 =head1 AUTHOR
 
