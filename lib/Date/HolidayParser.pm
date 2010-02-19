@@ -816,13 +816,13 @@ within your perl program in whatever way you wish.
 
 =head1 EXPORT
 
-This module doesn't export anything by default. It can however export the Parse
-and EasterCalc function upon request by issuing
+This module doesn't export anything by default. It can however export the
+EasterCalc function upon request by issuing
 
 	use Date::HolidayParser qw(EasterCalc);
 	...
 
-=head1 FUNCTIONS
+=head1 METHODS and FUNCTIONS
 
 =head2 $object = Date::HolidayParser->new(FILE);
 
@@ -920,7 +920,7 @@ The UK holiday file was chosen because it is rather small and simple.
 	use Date::HolidayParser;
 	
 	# Call Date::HolidayParser to parse the file
-	my $Holidays = Date::HolidayParser->new();
+	my $Holidays = Date::HolidayParser->new(/path/to/file);
 	my $Holidays_2006 = $Holidays->get(2006);
 
 	# Set a proper Data::Dumper format and dump the data returned by Date::HolidayParser to STDOUT
