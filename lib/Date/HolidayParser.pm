@@ -25,13 +25,19 @@ my @EXPORT_OK = qw(EasterCalc);
 our $VERSION;
 $VERSION = 0.4;
 
-# The user should be able to tell us to be silent
+# Deprecated silencing variable
 our $BeSilent;
 
 # --- Attributes ---
 has 'file' => (
 	is	=> 'ro',
 	isa => 'Str',
+);
+
+has 'silent' => (
+	is => 'rw',
+	isa => 'Bool',
+	default => false,
 );
 
 has '_cache' => (
@@ -129,9 +135,9 @@ sub BUILDARGS
 {
 	my $class = shift;
 	my $file = shift;
-	if ($file)
+	if (defined $file)
 	{
-		return { file => $file };
+		unshift(@_,'file',$file);
 	}
 	return $class->SUPER::BUILDARGS(@_);
 }
@@ -233,14 +239,19 @@ sub _SyntaxError
 	$self->_PrintError('Syntax error',@_);
 }
 
-# Purpose. Actually print the error (obeying $BeSilent)
+# Purpose. Actually print the error
 # Usage: $self->_PrintError(TYPE,LINE,FILE,ERROR,ACTION);
 sub _PrintError
 {
 	my $self = shift;
-	my($type,$line,$file,$error,$action) = @_;
-	if(not $BeSilent)
+	if ($BeSilent and not $self->silent)
 	{
+		$self->silent(true);
+		warn("\$Date::HolidayParser::BeSilent is deprecated. Use the silent attribute instead\n");
+	}
+	elsif(not $self->silent)
+	{
+		my($type,$line,$file,$error,$action) = @_;
 		warn("*** Holiday parser: $type: $error on line $line in $file. $action");
 	}
 }
@@ -856,6 +867,17 @@ It returns the day of easter of the year supplied.
 NOTE: The day returned begins on 0. This means that the days returned
 are 0-364 instead of 1-365.
 
+=head1 ATTRIBUTES
+
+Attributes can be supplied to the constructor as a parameter after the
+file parameter (ie. Date::HolidayParser->new('file', attribute => "value");),
+or you can use $object->attribute(VALUE).
+
+=head2 silent
+
+If true this will make Date::HolidayParser not output any warnings (such as
+syntax errors).
+
 =head1 HASH SYNTAX
 
 The returned hash is in the following format:
@@ -981,9 +1003,8 @@ a visual (perl-usable) representation of the hash to stdout.
 
 =head2 $Date::HolidayParser::BeSilent
 
-If this is set to any true value then the holiday parser will not output any
-errors (syntax or internal) unless they are fatal (causing the module to
-die()) or invalid usage of one or more of the functions.
+This variable is deprecated, it is the same as setting the silent attribute.
+It will be removed in a future version.
 
 =head1 INCOMPATIBILITIES
 
