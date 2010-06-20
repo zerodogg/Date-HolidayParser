@@ -4,7 +4,7 @@ Version 0.41
 -------------------------------------------
 - Fixed a problem where the UIDs in Date::HolidayParser::iCalendar was
   timezone-specific. The UIDs have been changed to be timezone-agnostic.
-
+- Minor code cleanups
 
 Version 0.4 
 -------------------------------------------

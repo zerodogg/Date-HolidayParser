@@ -208,7 +208,7 @@ sub _event_to_iCalendar
 	my $unixtime = POSIX::mktime(0, 0, 0, $FinalYDay, 0, $PosixYear);
 
 	# Generate the UID of the event, this is simply a 
-	my $sum = unpack("%32C*", $name);
+	my $sum = unpack('%32C*', $name);
 	# This should be unique enough for our needs.
 	# We don't want it to be random, because if someone copies the events to their
 	# own calendar, we want DP::iCalendar::Manager to fetch the information from
