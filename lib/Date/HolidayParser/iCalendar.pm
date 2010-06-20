@@ -20,7 +20,7 @@ use Any::Moose;
 use Date::HolidayParser;
 use constant { true => 1, false => undef };
 
-our $VERSION = 0.4;
+our $VERSION = 0.41;
 
 extends 'Date::HolidayParser';
 
@@ -183,7 +183,7 @@ around '_addParsedEvent' => sub
 
 	my($FinalParsing,$final_mon,$final_mday,$HolidayName,$holidayType,$FinalYDay,$PosixYear) = @_;
 
-	my $UID = $self->_event_to_iCalendar(POSIX::mktime(0, 0, 0, $FinalYDay, 0, $PosixYear),$HolidayName);
+	my $UID = $self->_event_to_iCalendar($FinalYDay,$PosixYear,$HolidayName);
 	my $Year = $PosixYear+1900;
 
 	if(not $self->_iCal_cache->{$Year}->{$final_mon}{$final_mday}{'DAY'})
@@ -200,16 +200,20 @@ around '_addParsedEvent' => sub
 sub _event_to_iCalendar
 {
 	my $self = shift;
-	my $unixtime = shift;
+	my $FinalYDay = shift;
+	my $PosixYear = shift;
 	my $name = shift;
 	$name =~ s/\s/-/g;
+
+	my $unixtime = POSIX::mktime(0, 0, 0, $FinalYDay, 0, $PosixYear);
+
 	# Generate the UID of the event, this is simply a 
 	my $sum = unpack("%32C*", $name);
 	# This should be unique enough for our needs.
 	# We don't want it to be random, because if someone copies the events to their
 	# own calendar, we want DP::iCalendar::Manager to fetch the information from
 	# the changed calendar, instead of from the HolidayParser object.
-	my $UID = 'D-HP-ICS-'.$unixtime.$sum;
+	my $UID = 'D-HP-ICS-'.$FinalYDay.'-'.$PosixYear.'-'.$sum;
 	
 	$self->_UID_List->{$UID} = {
 		UID => $UID,
@@ -331,7 +335,7 @@ An example might look like this:
 
 	%Hash = (
 		'SUMMARY' => 'Monday',
-		'UID' => 'D-HP-ICS-1142204400616',
+		'UID' => 'D-HP-ICS-72-106-616',
 		'DTEND' => '20060313',
 		'DTSTART' => '20060313'
 	);

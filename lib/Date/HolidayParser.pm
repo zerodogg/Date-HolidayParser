@@ -23,7 +23,7 @@ my @EXPORT_OK = qw(EasterCalc);
 
 # Version number
 our $VERSION;
-$VERSION = 0.4;
+$VERSION = 0.4_1;
 
 # Deprecated silencing variable
 our $BeSilent;
